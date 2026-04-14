@@ -1,0 +1,153 @@
+/* ===== 背景动画 ===== */
+body {
+    background: linear-gradient(135deg, #F5F7F8 0%, #E8F0F2 50%, #F5F7F8 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* ===== 文字渐变 ===== */
+.text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(135deg, #5B7C8B, #8FA89E);
+}
+
+/* ===== 按钮悬浮效果 ===== */
+.button-hover {
+    transition: all 0.3s ease;
+}
+.button-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(91, 124, 139, 0.2);
+}
+
+/* ===== 输入框聚焦 ===== */
+.input-focus:focus {
+    border-color: #5B7C8B;
+    box-shadow: 0 0 0 3px rgba(91, 124, 139, 0.1);
+    outline: none;
+}
+
+/* ===== 专辑封面卡片 ===== */
+.album-cover {
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+    transition: all 0.4s ease;
+}
+.album-cover:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 56px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== 淡入动画 ===== */
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== 脉冲动画（空状态图标） ===== */
+.pulse-animation {
+    animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.03); }
+}
+
+/* ===== 标签激活态下划线 ===== */
+.tag-active {
+    position: relative;
+}
+.tag-active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, #5B7C8B, #8FA89E);
+}
+
+/* ===== 歌词滚动区域 ===== */
+.lyrics-scroll {
+    max-height: 200px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+.lyrics-scroll::-webkit-scrollbar {
+    width: 3px;
+}
+.lyrics-scroll::-webkit-scrollbar-thumb {
+    background: #5B7C8B44;
+    border-radius: 3px;
+}
+
+/* ===== 歌词行样式 ===== */
+.lyrics-line {
+    transition: all 0.4s ease;
+    opacity: 0.45;
+    padding: 4px 0;
+}
+.lyrics-line.active {
+    color: #5B7C8B;
+    font-weight: 700;
+    transform: scale(1.08);
+    opacity: 1;
+    text-shadow: 0 0 12px rgba(91, 124, 139, 0.3);
+}
+
+/* ===== 专辑旋转动画 ===== */
+.album-spin {
+    animation: albumSpin 20s linear infinite;
+}
+.album-spin.paused {
+    animation-play-state: paused;
+}
+@keyframes albumSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ===== 专辑容器 ===== */
+.album-container {
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    width: 280px;
+    height: 280px;
+    flex-shrink: 0;
+    position: relative;
+}
+.album-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+#album-spin-container {
+    width: 100%;
+    height: 100%;
+}
+#album-spin-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ===== 历史记录列表滚动条 ===== */
+#history-list::-webkit-scrollbar {
+    width: 4px;
+}
+#history-list::-webkit-scrollbar-thumb {
+    background: #5B7C8B44;
+    border-radius: 4px;
+}

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 音乐生成</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5B7C8B',
+                        secondary: '#8FA89E',
+                        accent: '#D4A574',
+                        neutral: {
+                            white: '#FFFFFF',
+                            light: '#F5F7F8',
+                            medium: '#E3E8EA',
+                            dark: '#5A6C71',
+                            black: '#2C3E44'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif SC', 'serif'],
+                        sans: ['Noto Sans SC', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans h-screen flex flex-col">
+
+    <!-- 顶部导航 -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-primary/10 py-4 px-12 shadow-sm">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+                    <i class="fa fa-music text-white text-lg"></i>
+                </div>
+                <h1 class="text-2xl font-serif font-bold text-gradient">AI 音乐生成</h1>
+            </div>
+            <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                <i class="fa fa-bolt mr-1"></i>Powered by MiniMax
+            </span>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 flex overflow-hidden">
+
+        <!-- 左侧操作区 -->
+        <div class="w-96 bg-white/70 backdrop-blur-md p-8 overflow-y-auto border-r border-primary/10 flex-shrink-0">
+            <div class="space-y-6">
+
+                <!-- 创作标题 -->
+                <div>
+                    <h2 class="text-xl font-serif font-bold text-neutral-black mb-1">创作音乐</h2>
+                    <p class="text-sm text-neutral-dark">输入描述，AI 将为您生成带人声演唱的原创歌曲</p>
+                </div>
+
+                <!-- 音乐描述 -->
+                <div>
+                    <label class="block text-sm font-medium text-neutral-dark mb-2">音乐描述</label>
+                    <textarea id="prompt-input" rows="4" maxlength="1000"
+                        placeholder="描述你想要的音乐风格，例如：一首关于夏天海边的流行歌曲..."
+                        class="w-full p-4 rounded-xl bg-white border border-neutral-medium input-focus resize-none transition-all"></textarea>
+                    <div class="text-right text-xs text-neutral-dark mt-1">
+                        <span id="char-count">0</span>/1000
+                    </div>
+                </div>
+
+                <!-- 歌词（可选，仅歌唱模式） -->
+                <div id="lyrics-section" class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-sm font-medium text-neutral-dark">歌词（可选）</label>
+                        <button id="generate-lyrics-btn" class="text-xs text-primary hover:text-accent transition-colors flex items-center">
+                            <i class="fa fa-magic mr-1"></i> AI生成歌词
+                        </button>
+                    </div>
+                    <textarea id="lyrics-input" rows="3" maxlength="500"
+                        placeholder="输入自定义歌词，或点击上方按钮让AI生成..."
+                        class="w-full p-3 rounded-xl bg-white border border-neutral-medium input-focus resize-none transition-all text-sm"></textarea>
+                    <div id="lyrics-loading" class="hidden text-xs text-primary flex items-center">
+                        <i class="fa fa-spinner fa-spin mr-2"></i> 正在生成歌词...
+                    </div>
+                </div>
+
+                <!-- 音乐语言 -->
+                <div>
+                    <label class="block text-sm font-medium text-neutral-dark mb-2">音乐语言</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="py-2 px-3 rounded-lg bg-primary text-white font-medium text-sm transition-all" data-lang="中文">
+                            <i class="fa fa-language mr-1"></i> 中文
+                        </button>
+                        <button class="py-2 px-3 rounded-lg bg-neutral-light text-neutral-dark font-medium text-sm transition-all hover:bg-neutral-medium" data-lang="粤语">
+                            <i class="fa fa-globe mr-1"></i> 粤语
+                        </button>
+                        <button class="py-2 px-3 rounded-lg bg-neutral-light text-neutral-dark font-medium text-sm transition-all hover:bg-neutral-medium" data-lang="英文">
+                            <i class="fa fa-flag mr-1"></i> 英文
+                        </button>
+                    </div>
+                    <input type="hidden" id="lang-input" value="中文">
+                </div>
+
+                <!-- 音乐风格 -->
+                <div>
+                    <label class="block text-sm font-medium text-neutral-dark mb-2">音乐风格</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="py-2 px-2 rounded-lg bg-primary text-white font-medium text-xs transition-all" data-style="流行">流行</button>
+                        <button class="py-2 px-2 rounded-lg bg-neutral-light text-neutral-dark font-medium text-xs transition-all hover:bg-neutral-medium" data-style="摇滚">摇滚</button>
+                        <button class="py-2 px-2 rounded-lg bg-neutral-light text-neutral-dark font-medium text-xs transition-all hover:bg-neutral-medium" data-style="电子">电子</button>
+                        <button class="py-2 px-2 rounded-lg bg-neutral-light text-neutral-dark font-medium text-xs transition-all hover:bg-neutral-medium" data-style="民谣">民谣</button>
+                        <button class="py-2 px-2 rounded-lg bg-neutral-light text-neutral-dark font-medium text-xs transition-all hover:bg-neutral-medium" data-style="R&B">R&amp;B</button>
+                        <button class="py-2 px-2 rounded-lg bg-neutral-light text-neutral-dark font-medium text-xs transition-all hover:bg-neutral-medium" data-style="说唱">说唱</button>
+                        <button class="py-2 px-2 rounded-lg bg-neutral-light text-neutral-dark font-medium text-xs transition-all hover:bg-neutral-medium" data-style="爵士">爵士</button>
+                        <button class="py-2 px-2 rounded-lg bg-neutral-light text-neutral-dark font-medium text-xs transition-all hover:bg-neutral-medium" data-style="古典">古典</button>
+                        <button class="py-2 px-2 rounded-lg bg-neutral-light text-neutral-dark font-medium text-xs transition-all hover:bg-neutral-medium" data-style="国风">国风</button>
+                    </div>
+                    <input type="hidden" id="style-input" value="流行">
+                </div>
+
+                <!-- 音乐类型 -->
+                <div>
+                    <label class="block text-sm font-medium text-neutral-dark mb-2">音乐类型</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button class="py-2 px-3 rounded-lg bg-primary text-white font-medium text-sm transition-all" data-type="vocal">
+                            <i class="fa fa-microphone mr-1"></i> 歌唱
+                        </button>
+                        <button class="py-2 px-3 rounded-lg bg-neutral-light text-neutral-dark font-medium text-sm transition-all hover:bg-neutral-medium" data-type="instrumental">
+                            <i class="fa fa-music mr-1"></i> 伴奏
+                        </button>
+                    </div>
+                    <input type="hidden" id="type-input" value="vocal">
+                </div>
+
+                <!-- 音乐时长 -->
+                <div>
+                    <label class="block text-sm font-medium text-neutral-dark mb-2">音乐时长</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button class="py-2 px-3 rounded-lg bg-primary text-white font-medium text-sm transition-all" data-duration="30">30秒</button>
+                        <button class="py-2 px-3 rounded-lg bg-neutral-light text-neutral-dark font-medium text-sm transition-all hover:bg-neutral-medium" data-duration="60">1分钟</button>
+                        <button class="py-2 px-3 rounded-lg bg-neutral-light text-neutral-dark font-medium text-sm transition-all hover:bg-neutral-medium" data-duration="120">2分钟</button>
+                        <button class="py-2 px-3 rounded-lg bg-neutral-light text-neutral-dark font-medium text-sm transition-all hover:bg-neutral-medium" data-duration="180">3分钟</button>
+                    </div>
+                    <input type="hidden" id="duration-input" value="30">
+                </div>
+
+                <!-- 生成按钮 -->
+                <button id="generate-music-btn"
+                    class="w-full py-3 bg-gradient-to-r from-primary to-secondary text-white font-bold rounded-xl button-hover shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fa fa-magic mr-2"></i> 生成音乐
+                </button>
+
+                <!-- 消息提示 -->
+                <div id="success-message" class="hidden bg-green-50 text-green-700 p-3 rounded-lg flex items-center text-sm">
+                    <i class="fa fa-check-circle mr-2"></i><span>音乐生成成功！</span>
+                </div>
+                <div id="error-message" class="hidden bg-red-50 text-red-700 p-3 rounded-lg text-sm">
+                    生成失败，请重试
+                </div>
+
+                <!-- 历史记录 -->
+                <div class="pt-6 border-t border-neutral-medium">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-base font-serif font-bold text-neutral-black">
+                            <i class="fa fa-history mr-2 text-primary"></i>历史记录
+                        </h3>
+                        <button id="refresh-history" class="text-xs text-primary hover:text-accent transition-colors">
+                            <i class="fa fa-refresh mr-1"></i>刷新
+                        </button>
+                    </div>
+                    <div id="history-list" class="space-y-2 max-h-64 overflow-y-auto">
+                        <p class="text-sm text-neutral-dark text-center py-4">暂无历史记录</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 右侧结果区 -->
+        <div class="flex-1 flex items-start justify-center pt-10 px-12 pb-12 bg-gradient-to-br from-white/50 to-primary/5 overflow-y-auto">
+
+            <!-- 空状态 -->
+            <div id="empty-state" class="text-center my-auto self-center">
+                <div class="w-48 h-48 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl mx-auto mb-8 flex items-center justify-center pulse-animation">
+                    <i class="fa fa-music text-6xl text-primary"></i>
+                </div>
+                <h3 class="text-2xl font-serif font-bold text-neutral-black mb-3">开始创作音乐</h3>
+                <p class="text-neutral-dark max-w-md">输入音乐描述，选择语言、风格和时长，点击生成按钮开始创作</p>
+            </div>
+
+            <!-- 歌曲选择界面（降级使用） -->
+            <div id="music-selection" class="w-full max-w-4xl hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <button id="back-to-empty" class="flex items-center text-neutral-dark hover:text-primary transition-colors">
+                        <i class="fa fa-arrow-left mr-2"></i>返回
+                    </button>
+                    <div class="text-center">
+                        <h3 class="text-xl font-serif font-bold text-neutral-black">选择歌曲播放</h3>
+                        <p id="music-source-hint" class="text-xs text-neutral-dark mt-1"></p>
+                    </div>
+                    <div class="w-20"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- 音乐播放器 -->
+            <div id="music-player" class="w-full max-w-3xl bg-white/80 backdrop-blur-md rounded-3xl p-8 shadow-xl hidden">
+
+                <!-- 顶部栏：返回 + 类型标签 -->
+                <div class="flex items-center justify-between mb-6">
+                    <button id="back-to-selection" class="flex items-center px-4 py-2 bg-primary text-white rounded-full shadow-md hover:bg-secondary transition-all">
+                        <i class="fa fa-arrow-left mr-2"></i>
+                        <span class="font-medium">返回</span>
+                    </button>
+                    <span id="music-type-badge" class="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full font-medium">
+                        <i class="fa fa-microphone mr-1"></i> 歌唱
+                    </span>
+                </div>
+
+                <!-- 专辑封面 -->
+                <div class="flex flex-col items-center mb-8">
+                    <div class="mb-4" style="width:200px;height:200px;border-radius:50%;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.3);position:relative;">
+                        <div id="album-spin-container" class="album-spin paused" style="width:100%;height:100%;">
+                            <img id="current-cover" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+                        </div>
+                        <div class="absolute top-1/2 left-1/2 w-10 h-10 bg-neutral-light rounded-full flex items-center justify-center shadow-lg z-10 pointer-events-none"
+                            style="transform:translate(-50%,-50%);">
+                            <i class="fa fa-music text-primary text-sm"></i>
+                        </div>
+                    </div>
+                    <h3 id="current-title" class="text-xl font-serif font-bold text-neutral-black mb-1 text-center px-4" style="word-break:break-all;max-width:100%;"></h3>
+                    <p id="current-duration" class="text-sm text-neutral-dark"></p>
+                </div>
+
+                <!-- 播放控制 -->
+                <div class="space-y-5">
+                    <!-- 进度条 -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs text-neutral-dark font-medium">
+                            <span id="current-time">00:00</span>
+                            <span id="total-time">00:00</span>
+                        </div>
+                        <div id="progress-container" class="relative w-full h-3 bg-neutral-medium rounded-full overflow-hidden cursor-pointer">
+                            <div id="progress-fill" class="absolute left-0 top-0 h-full bg-gradient-to-r from-primary to-secondary rounded-full" style="width:0%"></div>
+                            <div id="progress-handle" class="absolute top-1/2 w-4 h-4 bg-white rounded-full shadow-md border-2 border-primary -translate-y-1/2" style="left:0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- 播放按钮 -->
+                    <div class="flex justify-center items-center space-x-8">
+                        <button id="prev-btn" class="text-neutral-dark hover:text-primary transition-colors">
+                            <i class="fa fa-step-backward text-xl"></i>
+                        </button>
+                        <button id="play-pause-btn" class="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-lg hover:bg-secondary transition-colors">
+                            <i class="fa fa-play text-2xl"></i>
+                        </button>
+                        <button id="next-btn" class="text-neutral-dark hover:text-primary transition-colors">
+                            <i class="fa fa-step-forward text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- 音量 -->
+                    <div class="flex justify-center items-center space-x-3">
+                        <button id="volume-btn" class="text-neutral-dark hover:text-primary transition-colors">
+                            <i class="fa fa-volume-up"></i>
+                        </button>
+                        <input type="range" id="volume-bar" min="0" max="100" value="80"
+                            class="w-32 h-2 bg-neutral-medium rounded-full appearance-none cursor-pointer accent-primary">
+                    </div>
+                </div>
+
+                <!-- 歌词区域 -->
+                <div class="mt-8 p-5 bg-neutral-light/50 rounded-xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-sm font-medium text-neutral-dark">
+                            <i class="fa fa-file-text mr-2"></i>歌词
+                        </h4>
+                        <div class="flex items-center space-x-2">
+                            <button id="translate-btn" class="hidden text-xs px-2 py-1 bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors">
+                                <i class="fa fa-language mr-1"></i>翻译
+                            </button>
+                            <span id="lyrics-type" class="text-xs text-neutral-dark">
+                                <i class="fa fa-microphone mr-1"></i> 歌唱模式
+                            </span>
+                        </div>
+                    </div>
+                    <div class="lyrics-scroll space-y-1" id="lyrics-container"></div>
+                    <div id="translation-container" class="hidden mt-4 pt-4 border-t border-neutral-medium/50">
+                        <p class="text-xs text-neutral-dark mb-2"><i class="fa fa-globe mr-1"></i>翻译</p>
+                        <p id="translated-lyrics" class="text-sm text-primary leading-relaxed text-center"></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部 -->
+    <footer class="bg-white/80 backdrop-blur-md border-t border-primary/10 py-3 text-center text-xs text-neutral-dark">
+        AI 音乐生成 | Powered by MiniMax
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
