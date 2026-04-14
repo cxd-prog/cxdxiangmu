@@ -1,7 +1,8 @@
 services:
   - type: web
-    name: ai-music-generator-backend
+    name: ai-music-generator
     runtime: python
+    rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import requests
 import os
@@ -12,8 +12,23 @@ from dotenv import load_dotenv
 # 加载环境变量
 load_dotenv()
 
+# 前端目录（相对于 backend 的上一级）
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'frontend')
+
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)
+
+# ===== 托管前端静态文件 =====
+@app.route('/')
+def index():
+    return send_from_directory(FRONTEND_DIR, 'index.html')
+
+@app.route('/<path:filename>')
+def frontend_files(filename):
+    # API 路由不走这里
+    if filename.startswith('api/'):
+        return jsonify({"code": 404, "message": "Not Found"}), 404
+    return send_from_directory(FRONTEND_DIR, filename)
 
 # 数据库配置
 DATABASE = 'music_history.db'

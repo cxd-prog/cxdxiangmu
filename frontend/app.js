@@ -1,8 +1,7 @@
-// 生产环境请将下面的地址替换为你的 Render 后端地址
-// 例如：const API_BASE = 'https://ai-music-generator-backend.onrender.com';
+// 本地开发用 localhost:5000，部署后前后端同域直接用空字符串
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:5000'
-    : 'https://ai-music-generator-backend.onrender.com'; // 部署后替换为真实后端地址
+    : '';  // 部署后前后端同域，无需填写地址
 
 // ===== 字符计数 =====
 const promptInput = document.getElementById('prompt-input');
