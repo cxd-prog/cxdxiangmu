@@ -1,165 +1,121 @@
-# AI 音乐生成全流程演示系统
+# 🎵 AI 音乐生成器
 
-## 项目介绍
+基于 MiniMax 音乐生成 API 的智能音乐创作工具，支持多语言、多风格歌曲生成，含专辑封面自动生成与歌词滚动播放。
 
-这是一个通用 AI 音乐生成演示工具，支持任意风格/主题，界面现代高颜值，功能丝滑闭环，完美适配三次实时录屏演示。
+## ✨ 功能特性
 
-## 项目结构
+- 🎤 **AI 歌曲生成**：调用 MiniMax music-2.6-free 生成带人声演唱的原创歌曲
+- 🌏 **多语言支持**：中文、粤语、英文
+- 🎸 **多风格选择**：流行、摇滚、电子、民谣、R&B、说唱、爵士、古典、国风
+- 🖼️ **智能封面**：通义万相 AI 自动生成与音乐主题相关的专辑封面
+- 📜 **歌词滚动**：播放时歌词高亮同步滚动
+- 📚 **历史记录**：SQLite 持久化保存所有生成记录
+- ⏱️ **时长选择**：30秒 / 1分钟 / 2分钟 / 3分钟
+
+## 📁 项目结构
 
 ```
 ai-music-generator/
-├── frontend/            # 前端代码
-│   └── index.html       # 主页面
-├── backend/             # 后端代码
-│   ├── app.py           # Flask 应用
-│   ├── requirements.txt # 依赖文件
-│   └── .env             # 环境变量配置
-└── README.md            # 部署说明
+├── frontend/
+│   ├── index.html      # 页面结构
+│   ├── style.css       # 样式文件
+│   ├── app.js          # 交互逻辑
+│   └── netlify.toml    # Netlify 部署配置
+├── backend/
+│   ├── app.py          # Flask 后端服务
+│   ├── requirements.txt
+│   ├── render.yaml     # Render 部署配置
+│   └── .env            # 环境变量（不上传）
+└── README.md
 ```
 
-## 技术栈
+## 🛠️ 技术栈
 
-- 前端：HTML + CSS + JavaScript + Tailwind CSS
-- 后端：Python + Flask + 百度千帆 API
+| 层级 | 技术 |
+|------|------|
+| 前端 | HTML + Tailwind CSS + 原生 JavaScript |
+| 后端 | Python + Flask + Flask-CORS |
+| 音乐生成 | MiniMax music-2.6-free API |
+| 封面生成 | 通义万相 wanx-v1 API |
+| 歌词生成 | MiniMax 歌词 API + 本地模板兜底 |
+| 数据库 | SQLite |
+| 部署 | 前端 Netlify + 后端 Render |
 
-## 核心功能
+## 🚀 本地运行
 
-1. **直接生成**：输入任意 Prompt，直接生成音乐
-2. **风格分析**：分析任意主题/风格，提取专业音乐特征
-3. **Agent 编排**：角色 + 分析 + 指令，生成专业级音乐 Prompt
-
-## 部署步骤
-
-### 1. 安装依赖
-
-#### 后端依赖
+### 1. 安装后端依赖
 
 ```bash
-# 进入后端目录
 cd backend
-
-# 安装依赖
 pip install -r requirements.txt
 ```
 
 ### 2. 配置环境变量
 
-编辑 `backend/.env` 文件，填写百度千帆 API Key 和 Secret Key：
+创建 `backend/.env` 文件：
 
 ```env
-# 百度千帆 API 配置
-QIANFAN_API_KEY=your_api_key_here
-QIANFAN_SECRET_KEY=your_secret_key_here
+MINIMAX_API_KEY=你的MiniMax API Key
+TONGYI_API_KEY=你的通义万相 API Key
+QIANFAN_API_KEY=你的百度千帆 API Key
 ```
 
-### 3. 启动服务
-
-#### 启动后端服务
+### 3. 启动后端
 
 ```bash
-# 进入后端目录
 cd backend
-
-# 启动 Flask 服务
 python app.py
 ```
 
-后端服务将在 `http://localhost:5000` 运行。
+后端运行在 `http://localhost:5000`
 
-#### 启动前端服务
+### 4. 打开前端
 
-可以使用任何静态文件服务器来托管前端文件，例如：
+直接用浏览器打开 `frontend/index.html`，或：
 
 ```bash
-# 进入前端目录
 cd frontend
-
-# 使用 Python 内置服务器
-python -m http.server 8000
+python -m http.server 8080
 ```
 
-前端页面将在 `http://localhost:8000` 访问。
+访问 `http://localhost:8080`
 
-## 接口说明
+## ☁️ 线上部署
 
-### 1. 风格分析接口
+### 后端 → Render
 
-- 地址：`/api/v1/style-analysis`
-- 方法：POST
-- 请求参数：
-  ```json
-  {
-    "theme": "用户输入的分析主题"
-  }
-  ```
-- 响应参数：
-  ```json
-  {
-    "code": 200,
-    "message": "success",
-    "data": {
-      "result": "结构化的风格分析结果"
-    }
-  }
-  ```
+1. 登录 [render.com](https://render.com)，新建 Web Service
+2. 连接 GitHub 仓库，Root Directory 设为 `ai-music-generator/backend`
+3. Build Command：`pip install -r requirements.txt`
+4. Start Command：`gunicorn app:app --bind 0.0.0.0:$PORT`
+5. 在 Environment Variables 添加三个 API Key
 
-### 2. 专业 Prompt 生成接口
+### 前端 → Netlify
 
-- 地址：`/api/v1/generate-prompt`
-- 方法：POST
-- 请求参数：
-  ```json
-  {
-    "role": "角色设定内容",
-    "style_analysis": "风格分析结果",
-    "task": "任务指令"
-  }
-  ```
-- 响应参数：
-  ```json
-  {
-    "code": 200,
-    "message": "success",
-    "data": {
-      "prompt": "生成的专业音乐Prompt"
-    }
-  }
-  ```
+1. 登录 [netlify.com](https://netlify.com)
+2. 新建站点，连接 GitHub 仓库
+3. Base directory：`ai-music-generator/frontend`
+4. Publish directory：`ai-music-generator/frontend`
+5. 部署完成后，在 `app.js` 第 4 行将后端地址替换为 Render 服务地址
 
-### 3. 音乐生成接口
+## 📡 API 接口
 
-- 地址：`/api/v1/generate-music`
-- 方法：POST
-- 请求参数：
-  ```json
-  {
-    "prompt": "音乐生成Prompt"
-  }
-  ```
-- 响应参数：
-  ```json
-  {
-    "code": 200,
-    "message": "success",
-    "data": {
-      "audio_url": "音频播放链接",
-      "duration": 30, // 音频时长，单位秒
-      "title": "生成的音乐标题"
-    }
-  }
-  ```
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/api/v1/generate-music` | POST | 生成音乐 |
+| `/api/v1/generate-lyrics` | POST | 生成歌词 |
+| `/api/v1/music-history` | GET | 获取历史记录 |
+| `/api/v1/delete-music/<id>` | DELETE | 删除记录 |
 
-## 录屏演示建议
+## 📝 生成音乐请求示例
 
-1. **第一次录制**：使用「直接生成」标签页，输入简单 Prompt 生成音乐
-2. **第二次录制**：使用「风格分析」标签页，输入分析主题，获取专业音乐特征
-3. **第三次录制**：使用「Agent 编排」标签页，粘贴风格分析结果，生成专业 Prompt，然后一键跳转生成音乐
-
-建议使用 1920×1080 分辨率，浏览器全屏显示，确保录屏效果最佳。
-
-## 注意事项
-
-1. 请确保已正确配置百度千帆 API Key 和 Secret Key
-2. 音乐生成接口当前为模拟实现，需要对接实际的音乐生成 API 才能生成真实的音乐
-3. 演示前请提前测试所有接口，确保响应时间 < 5 秒
-4. 静态资源已进行压缩，保证页面加载速度 < 1 秒
+```json
+{
+  "prompt": "一首关于夏天海边的流行歌曲",
+  "duration": 60,
+  "music_type": "vocal",
+  "lang": "中文",
+  "style": "流行",
+  "lyrics": "可选的自定义歌词"
+}
+```
